@@ -1,7 +1,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <EigenTypes.h>
-#include <d2V_linear_tetrahedron_dq2.h>
 
 //Input:
 //  q - generalized coordinates for the FEM system
