@@ -6,7 +6,8 @@ double chebDist(Eigen::Vector3d A, Eigen::Vector3d B) {
 }
 
 void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv,
-	const double dg, Eigen::VectorXd q, Eigen::VectorXd qdot) {
+	const double dg, Eigen::VectorXd q, Eigen::VectorXd qdot, 
+	Eigen::TensorXV &count_x, Eigen::TensorYV &count_y, Eigen::TensorZV &count_z) {
     
 	/*
 	
@@ -32,9 +33,6 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 	// Prep work
 	const int n = q.size() / 3;
 	const Eigen::Vector3d ONE_HALF = Eigen::Vector3d::Constant(0.5);
-	Eigen::TensorXV count_x;
-	Eigen::TensorYV count_y;
-	Eigen::TensorZV count_z;
 	// We initialize the weight counts at a small but positive number 
 	// so we don't have to check for divide-by-zero errors later
 	for (int i = 0; i < xv.size(); i++) {

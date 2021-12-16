@@ -16,6 +16,10 @@
 
 	q: (n*3)x1 generalized coordinates
 	qdot: (n*3)x1 generalized velocity
+
+	weight count tensors provided as scratch space since they 
+	take a lot of space and we don't want to blow the stack.
 */
 void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv,
-	const double dg, Eigen::VectorXd q, Eigen::VectorXd qdot);
+	const double dg, Eigen::VectorXd q, Eigen::VectorXd qdot,
+	Eigen::TensorXV& count_x, Eigen::TensorYV& count_y, Eigen::TensorZV& count_z);
