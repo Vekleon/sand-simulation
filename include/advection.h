@@ -3,4 +3,4 @@
 #include <EigenTypes.h>
 
 // TODO
-void advection();
+void advection(Eigen::VectorXd& qdot);

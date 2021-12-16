@@ -1,5 +1,5 @@
 #include <advection.h>
 
-void advection() {
-    //TODO
+void advection(Eigen::VectorXd &qdot) {
+	return;
 }

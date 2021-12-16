@@ -2,5 +2,4 @@
 #include <Eigen/Sparse>
 #include <EigenTypes.h>
 
-// TODO
-void apply_external_forces();
+void apply_external_forces(Eigen::VectorXd &qdot, const double dt);

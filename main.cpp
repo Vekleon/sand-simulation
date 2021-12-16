@@ -9,17 +9,11 @@
 #include <Eigen/Dense>
 
 #include <init_state.h>
-#include <mass_matrix_particles.h>
 #include <find_min_vertices.h>
 #include <fixed_point_constraints.h>
-#include <dV_spring_particle_particle_dq.h>
-#include <dV_gravity_particle_dq.h>
-#include <d2V_spring_particle_particle_dq2.h>
 #include <assemble_forces.h>
 #include <assemble_stiffness.h>
 #include <linearly_implicit_euler.h>
-#include <T_particle.h>
-#include <V_gravity_particle.h>
 #include <V_spring_particle_particle.h>
 
 //Simulation State
@@ -57,28 +51,28 @@ void simulate() {
 
 bool draw(igl::opengl::glfw::Viewer & viewer) {
 
-        double V_spring, V_gravity, T_p, KE,PE;
-        KE = 0;
-        PE = 0;
+    //    double V_spring, V_gravity, T_p, KE,PE;
+    //    KE = 0;
+    //    PE = 0;
 
-        for(unsigned int p = 0; p < V.rows(); p++) {
-            T_particle(T_p, (P.transpose()*qdot).segment<3>(3*p), m);
-            V_gravity_particle(V_gravity, (P.transpose()*q+x0).segment<3>(3*p), m, Eigen::Vector3d(0., -9.8, 0.));
+    //    for(unsigned int p = 0; p < V.rows(); p++) {
+    //        T_particle(T_p, (P.transpose()*qdot).segment<3>(3*p), m);
+    //        V_gravity_particle(V_gravity, (P.transpose()*q+x0).segment<3>(3*p), m, Eigen::Vector3d(0., -9.8, 0.));
 
-            PE += V_gravity;
-            KE += T_p;
-        }
-        
-        for(unsigned int ei = 0; ei < E.rows(); ei++) {
-            V_spring_particle_particle(V_spring, (P.transpose()*q+x0).segment<3>(3*E(ei,0)), (P.transpose()*q+x0).segment<3>(3*E(ei,1)), l0(ei), k);
+    //        PE += V_gravity;
+    //        KE += T_p;
+    //    }
+    //    
+    //    for(unsigned int ei = 0; ei < E.rows(); ei++) {
+    //        V_spring_particle_particle(V_spring, (P.transpose()*q+x0).segment<3>(3*E(ei,0)), (P.transpose()*q+x0).segment<3>(3*E(ei,1)), l0(ei), k);
 
-            PE += V_spring;
-        }
-        
-        Visualize::add_energy(t, KE, PE);
+    //        PE += V_spring;
+    //    }
+    //    
+    //    Visualize::add_energy(t, KE, PE);
 
-    //update vertex positions using simulation
-    Visualize::update_vertex_positions(0, P.transpose()*q + x0);
+    ////update vertex positions using simulation
+    //Visualize::update_vertex_positions(0, P.transpose()*q + x0);
 
     return false;
 }
@@ -96,22 +90,12 @@ int main(int argc, char **argv) {
 
     //setup simulation 
     init_state(q,qdot,V);
-    mass_matrix_particles(M, q, m);
     
     //setup constraint matrix
     find_min_vertices(fixed_point_indices, V, 3);
     P.resize(q.rows(),q.rows());
     P.setIdentity();
     fixed_point_constraints(P, q.rows(), fixed_point_indices);
-
-    if(M.rows() == 0) {
-        std::cout<<"mass_matrix_particles not implmented ... exiting \n";
-        exit(0);
-    }
-
-    if(P.rows() == 0) {
-        std::cout<<"fixed_point_constraints not implemented ... exiting  \n";
-    }
 
     x0 = q - P.transpose()*P*q; //vector x0 contains position of all fixed nodes, zero for everything else
     
@@ -128,7 +112,7 @@ int main(int argc, char **argv) {
 
     //setup libigl viewer and activate 
     Visualize::setup(q, qdot, true);
-    Visualize::add_object_to_scene(V,F, Eigen::RowVector3d(244,165,130)/255.);
+    //Visualize::add_object_to_scene(V,F, Eigen::RowVector3d(244,165,130)/255.);
     Visualize::viewer().callback_post_draw = &draw;
     
     Visualize::viewer().launch_init(true,false,"Mass-Spring Systems",0,0);
