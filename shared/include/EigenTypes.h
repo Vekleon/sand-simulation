@@ -43,10 +43,10 @@ namespace Eigen {
     using SparseMatrixd = Eigen::SparseMatrix<double>;
 
 	// Forgive us for this we had no other choice lmao
-	using TensorP = std::array<Eigen::Matrix<float, TENSOR_P_X, TENSOR_P_Y>, TENSOR_P_Z>;
-	using TensorXV = std::array<Eigen::Matrix<float, TENSOR_XV_X, TENSOR_XV_Y>, TENSOR_XV_Z>;
-	using TensorYV = std::array<Eigen::Matrix<float, TENSOR_YV_X, TENSOR_YV_Y>, TENSOR_YV_Z>;
-	using TensorZV = std::array<Eigen::Matrix<float, TENSOR_ZV_X, TENSOR_ZV_Y>, TENSOR_ZV_Z>;
+	using TensorP = std::array<Eigen::Matrix<float, TENSOR_P_Y, TENSOR_P_Z>, TENSOR_P_X>;
+	using TensorXV = std::array<Eigen::Matrix<float, TENSOR_XV_Y, TENSOR_XV_Z>, TENSOR_XV_X>;
+	using TensorYV = std::array<Eigen::Matrix<float, TENSOR_YV_Y, TENSOR_YV_Z>, TENSOR_YV_X>;
+	using TensorZV = std::array<Eigen::Matrix<float, TENSOR_ZV_Y, TENSOR_ZV_Z>, TENSOR_ZV_X>;
 
 }
 

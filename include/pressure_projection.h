@@ -5,9 +5,9 @@
 /*
 	Performs pressure projection
 
-	xv: axb grid of x velocities
-	yv: axb grid of y velocities
-	zv: axb grid of z velocities
+	xv: (X+1) * Y * Z tensor of x-component velocities
+	yv: X * (Y+1) * Z tensor of y-component velocities
+	zv: X * Y * (Z+1) tensor of z-component velocities
 	pressure: (a-1)x(b-1) grid of pressures
 	q: (n*3)x1 generalized coordinates
 	qdot: (n*3)x1 generalized velocity
@@ -17,6 +17,6 @@
 	dz: distance along axis between positions on zv
 */
 void pressure_projection(
-	Eigen::MatrixXd &xv, Eigen::MatrixXd& yv, Eigen::MatrixXd& zv, Eigen::MatrixXd &pressure,
+	Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv, Eigen::TensorP &pressure,
 	Eigen::VectorXd q, Eigen::VectorXd qdot, Eigen::MatrixXd P,
-	const double dx, const double dy);
+	const double dx, const double dy, const double dz, const double density);
