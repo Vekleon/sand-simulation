@@ -11,8 +11,6 @@
 #include <init_state.h>
 #include <find_min_vertices.h>
 #include <fixed_point_constraints.h>
-#include <assemble_forces.h>
-#include <assemble_stiffness.h>
 #include <linearly_implicit_euler.h>
 #include <V_spring_particle_particle.h>
 
