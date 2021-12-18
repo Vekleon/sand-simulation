@@ -51,7 +51,7 @@ namespace Eigen {
 }
 
 template <int X, int Y, int Z>
-inline float& tensorCoeffRef(std::array<Eigen::Matrix<float, Y, Z>, X> &tensor, Eigen::Vector3i &idx) {
+inline float& tensorCoeffRef(std::array<Eigen::Matrix<float, Y, Z>, X> &tensor, Eigen::Vector3i idx) {
 	int x = idx(0), y = idx(1), z = idx(2);
 	assert(0 <= x && x < X);
 	assert(0 <= y && y < Y);
