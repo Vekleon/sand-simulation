@@ -24,9 +24,7 @@ void pressure_projection(
 		for (int y = 0; y < yDimension; y++) {
 			for (int x = 0; x < xDimension; x++) {
 				Eigen::VectorXd qj(6);
-				qj << xv.at(x)(y, z), xv.at(x + 1)(y, z), yv.at(x)(y, z), yv.at(x)(y + 1, z), zv.at(x)(y, z), zv.at(x)(y, z + 1);
-
-				
+				qj << xv.at(x)(y, z), xv.at(x + 1)(y, z), yv.at(x)(y, z), yv.at(x)(y + 1, z), zv.at(x)(y, z), zv.at(x)(y, z + 1);				
 			}
 		}
 	}

@@ -29,6 +29,7 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 	
 	*/
 
+	// TODO: make in terms of P0
 
 	// Prep work
 	const int n = q.size() / 3;
