@@ -34,12 +34,18 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 	
 	*/
 
-	// Prep work
 	const int n = q.size() / 3;
-	const Eigen::Vector3d ONE_HALF = Eigen::Vector3d::Constant(0.5);
-	const Eigen::Vector3d X_GRID_OFFSET = Eigen::Vector3d(0, 0, 0.5);
-	const Eigen::Vector3d Y_GRID_OFFSET = Eigen::Vector3d(0, 0.5, 0);
-	const Eigen::Vector3d Z_GRID_OFFSET = Eigen::Vector3d(0.5, 0, 0);
+
+	/*
+	Each row of this matrix represents the offset from p0 to the point on a velocity grid which is closest to the origin.
+	For example, the (0, 0, 0) point on the X-Velocity grid is equal to p0 - <0.5, 0.5, 0.0>.
+	*/
+	Eigen::Matrix3d GRID_OFFSETS;
+	GRID_OFFSETS <<
+		0.5, 0.5, 0.0,
+		0.0, 0.5, 0.5,
+		0.5, 0.0, 0.5;
+
 	// We initialize the weight counts at a small but positive number 
 	// so we don't have to check for divide-by-zero errors later
 	for (int i = 0; i < xv.size(); i++) {
@@ -64,46 +70,45 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 
 		Eigen::Vector3d particle_pos = q.segment<3>(pi * 3);
 
-		// X VELOCITY GRID
-		// Index a cell of the X component velocity grid by indexing the corner closest to the origin
-		roundVectorDown(cell_idx, (1. / dg) * (particle_pos - p0) - X_GRID_OFFSET);
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 2; j++) {
-				for (int k = 0; k < 2; k++) {
-					corners_matrix.row(getCornerIndex(i, j, k)) = dg * (cell_idx.cast<double>() + Eigen::Vector3d(i, j, k) + X_GRID_OFFSET) + p0;
+		// For each grid G in the staggered grid...
+		for (int gi = 0; gi < 3; gi++) {
+
+			// Index the current cell by identifying the corner closest to the origin
+			roundVectorDown(cell_idx, (1. / dg) * (particle_pos - p0) - GRID_OFFSETS.row(gi));
+			for (int i = 0; i < 2; i++) {
+				for (int j = 0; j < 2; j++) {
+					for (int k = 0; k < 2; k++) {
+						corners_matrix.row(getCornerIndex(i, j, k)) = dg * (cell_idx.cast<double>() + Eigen::Vector3d(i, j, k) + GRID_OFFSETS.row(gi)) + p0;
+					}
+				}
+			}
+
+			// Resolve weights and apply sum, keeping track of weights
+			trilinear_weights(weights, corners_matrix, particle_pos);
+			Eigen::Vector3i corner_idx;
+			for (int wi = 0; wi < 8; wi++) {
+				int i, j, k;
+				getBinaryIndices(corner_idx, wi);
+				switch (gi) {
+					case 0:
+						tensorCoeffRef(xv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
+						tensorCoeffRef(count_x, corner_idx + cell_idx) += weights.at(wi);
+						break;
+					case 1:
+						tensorCoeffRef(yv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
+						tensorCoeffRef(count_y, corner_idx + cell_idx) += weights.at(wi);
+						break;
+					case 2:
+						tensorCoeffRef(zv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
+						tensorCoeffRef(count_z, corner_idx + cell_idx) += weights.at(wi);
+						break;
+					default:
+						assert(false);
+						break;
 				}
 			}
 		}
-		trilinear_weights(weights, corners_matrix, particle_pos);
-		Eigen::Vector3i corner_idx;
-		for (int wi = 0; wi < 8; wi++) {
-			int i, j, k;
-			getBinaryIndices(corner_idx, wi);
-			tensorCoeffRef(xv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + 0);
-			tensorCoeffRef(count_x, corner_idx + cell_idx) += weights.at(wi);
-		}
 
-		//for (int x_offset = 0; x_offset <= 1; x_offset++) {
-		//	for (int z_offset = 0; z_offset <= 1; z_offset++) {
-		//		
-		//		// Current position in the x velocity grid
-		//		Eigen::Vector3i corner_idx;
-		//		corner_idx << cell_idx(0) + x_offset, cell_idx(1), cell_idx(2) + z_offset;
-
-		//		// Coordinates of current corner
-		//		Eigen::Vector3d corner_pos = dg * (corner_idx.cast<double>() - ONE_HALF);
-
-		//		// Resolve weight for this addition
-		//		const double dist = chebDist(corner_pos, particle_pos);
-		//		const double weight = 1 - (dist / dg);
-
-		//		// Add with weight and track running weight total
-		//		xv.at(corner_idx(0))(corner_idx(1), corner_idx(2)) += qdot(pi * 3 + 0) * weight;
-		//		count_x.at(corner_idx(0))(corner_idx(1), corner_idx(2)) += weight;
-		//	}
-		//}
-
-		// TODO: Y AND Z VELOCITY GRIDS
 	}
 
 	// Divide by weights now...might be very slow :(
