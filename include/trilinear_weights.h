@@ -40,4 +40,13 @@
 	particle - coordinates of interpolation point.
 
 */
-void trilinear_weights(std::array<double, 8> & weights, Eigen::Matrix<float, 8, 3> corners, Eigen::Vector3d particle);
+void trilinear_weights(std::array<double, 8> & weights, Eigen::Matrix<double, 8, 3> corners, Eigen::Vector3d particle);
+
+
+inline int getCornerIndex(int x, int y, int z) {
+	return x * (2 << 2) + y * (2 << 1) + z * (2 << 0);
+}
+
+inline void getBinaryIndices(Eigen::Vector3i indices, int cornerIndex) {
+	for (int i = 0; i < 3; i++) indices.coeffRef(i) = cornerIndex && 2 << i ? 1 : 0;
+}
