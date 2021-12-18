@@ -26,9 +26,9 @@ void trilinear_weights(std::array<double, 8> & weights, Eigen::Matrix<double, 8,
 	const Eigen::RowVector3d c010 = corners.row(2);
 	const Eigen::RowVector3d c100 = corners.row(4);
 
-	const double xd = (particle(0) - c000(0)) / (c001(0) - c000(0));
+	const double xd = (particle(0) - c000(0)) / (c100(0) - c000(0));
 	const double yd = (particle(1) - c000(1)) / (c010(1) - c000(1));
-	const double zd = (particle(2) - c000(2)) / (c100(2) - c000(2));
+	const double zd = (particle(2) - c000(2)) / (c001(2) - c000(2));
 
 	weights.at(0) = xd * yd - yd - zd - xd + xd * zd + yd * zd - xd * yd * zd + 1;
 	weights.at(1) = zd - xd * zd - yd * zd + xd * yd * zd;
