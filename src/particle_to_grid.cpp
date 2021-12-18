@@ -74,11 +74,11 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 		for (int gi = 0; gi < 3; gi++) {
 
 			// Index the current cell by identifying the corner closest to the origin
-			roundVectorDown(cell_idx, (1. / dg) * (particle_pos - p0) - GRID_OFFSETS.row(gi));
+			roundVectorDown(cell_idx, (1. / dg) * (particle_pos - p0) - GRID_OFFSETS.row(gi).transpose());
 			for (int i = 0; i < 2; i++) {
 				for (int j = 0; j < 2; j++) {
 					for (int k = 0; k < 2; k++) {
-						corners_matrix.row(getCornerIndex(i, j, k)) = dg * (cell_idx.cast<double>() + Eigen::Vector3d(i, j, k) + GRID_OFFSETS.row(gi)) + p0;
+						//corners_matrix.row(getCornerIndex(i, j, k)) = dg * (cell_idx.cast<double>() + Eigen::Vector3d(i, j, k) + GRID_OFFSETS.row(gi)) + p0;
 					}
 				}
 			}
