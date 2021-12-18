@@ -1,4 +1,5 @@
 #include <particle_to_grid.h>
+#include "trilinear_weights.h"
 
 // Return the greatest distance along any one axist from A to B. Unsigned.
 double chebDist(Eigen::Vector3d A, Eigen::Vector3d B) {
@@ -6,7 +7,7 @@ double chebDist(Eigen::Vector3d A, Eigen::Vector3d B) {
 }
 
 void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv,
-	const double dg, Eigen::VectorXd q, Eigen::VectorXd qdot, 
+	Eigen::Vector3d p0, double dg, Eigen::VectorXd q, Eigen::VectorXd qdot, 
 	Eigen::TensorXV &count_x, Eigen::TensorYV &count_y, Eigen::TensorZV &count_z) {
     
 	/*
@@ -53,7 +54,7 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 	for (int pi = 0; pi < n; pi++) {
 
 		Eigen::Vector3d particle_pos = q.segment<3>(pi * 3);
-		Eigen::Vector3i cell_idx = ((1. / dg) * particle_pos).cast<int>();
+		Eigen::Vector3i cell_idx = ((1. / dg) * (particle_pos - p0)).cast<int>();
 
 		// X VELOCITY GRID
 		for (int x_offset = 0; x_offset <= 1; x_offset++) {

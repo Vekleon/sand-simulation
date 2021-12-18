@@ -21,5 +21,5 @@
 	take a lot of space and we don't want to blow the stack.
 */
 void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv,
-	const double dg, Eigen::VectorXd q, Eigen::VectorXd qdot,
+	Eigen::Vector3d p0, const double dg, Eigen::VectorXd q, Eigen::VectorXd qdot,
 	Eigen::TensorXV& count_x, Eigen::TensorYV& count_y, Eigen::TensorZV& count_z);
