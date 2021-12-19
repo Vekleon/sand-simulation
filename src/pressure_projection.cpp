@@ -72,4 +72,6 @@ void pressure_projection(
 	assert(solver.info() == Eigen::Success);
 	Eigen::VectorXd p = solver.solve(d);
 	assert(solver.info() == Eigen::Success);
+
+	// TODO: Translate p to pressure
 }
