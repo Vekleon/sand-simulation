@@ -17,6 +17,6 @@
 	dz: distance along axis between positions on zv
 */
 void pressure_projection(
-	Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv, Eigen::TensorP &pressure,
-	Eigen::VectorXd q, Eigen::VectorXd qdot, Eigen::MatrixXd P,
-	const double dx, const double dy, const double dz, const double density);
+	Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv, Eigen::TensorP& pressures,
+	Eigen::VectorXd& q, Eigen::VectorXd& qdot, Eigen::TensorPB& P,
+	const double dg, const double density, const double dt);

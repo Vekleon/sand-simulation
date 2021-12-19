@@ -43,11 +43,23 @@ namespace Eigen {
     using SparseMatrixd = Eigen::SparseMatrix<double>;
 
 	// Forgive us for this we had no other choice lmao
-	using TensorP = std::array<Eigen::Matrix<float, TENSOR_P_Y, TENSOR_P_Z>, TENSOR_P_X>;
 	using TensorXV = std::array<Eigen::Matrix<float, TENSOR_XV_Y, TENSOR_XV_Z>, TENSOR_XV_X>;
 	using TensorYV = std::array<Eigen::Matrix<float, TENSOR_YV_Y, TENSOR_YV_Z>, TENSOR_YV_X>;
 	using TensorZV = std::array<Eigen::Matrix<float, TENSOR_ZV_Y, TENSOR_ZV_Z>, TENSOR_ZV_X>;
+	using TensorP = std::array<Eigen::Matrix<float, TENSOR_P_Y, TENSOR_P_Z>, TENSOR_P_X>;
+	using TensorPB = std::array<std::array<std::array<Eigen::Matrix44f, TENSOR_P_Z>, TENSOR_P_Y>, TENSOR_P_X>;
 
+}
+
+template <int X, int Y, int Z>
+inline bool validCoordinates(std::array<Eigen::Matrix<float, Y, Z>, X>& tensor, int x, int y, int z) {
+	return ((0 <= x && x < X) && (0 <= y && y < Y) && (0 <= z && z < Z));
+}
+
+template <int X, int Y, int Z>
+inline float tensorAtOrZero(std::array<Eigen::Matrix<float, Y, Z>, X>& tensor, int x, int y, int z) {
+	if (validCoordinates(tensor, x, y, z)) return tensorAt(tensor, x, y, z);
+	return 0.0;
 }
 
 template <int X, int Y, int Z>
