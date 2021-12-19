@@ -47,7 +47,7 @@ namespace Eigen {
 	using TensorYV = std::array<Eigen::Matrix<float, TENSOR_YV_Y, TENSOR_YV_Z>, TENSOR_YV_X>;
 	using TensorZV = std::array<Eigen::Matrix<float, TENSOR_ZV_Y, TENSOR_ZV_Z>, TENSOR_ZV_X>;
 	using TensorP = std::array<Eigen::Matrix<float, TENSOR_P_Y, TENSOR_P_Z>, TENSOR_P_X>;
-	using TensorPB = std::array<std::array<std::array<Eigen::Matrix44f, TENSOR_P_Z>, TENSOR_P_Y>, TENSOR_P_X>;
+	using TensorPB = std::array<std::array<std::array<Eigen::Matrix<double, 6, 6>, TENSOR_P_Z>, TENSOR_P_Y>, TENSOR_P_X>;
 
 }
 
@@ -74,6 +74,10 @@ inline float& tensorAt(std::array<Eigen::Matrix<float, Y, Z>, X>& tensor, int x,
 	assert(0 <= z && z < Z);
 	return tensor.at(x).coeffRef(y, z);
 }
+
+inline int get_cell_idx(int x, int y, int z, int xDim, int yDim, int zDim) {
+	return x + (y * xDim) + (z * yDim * zDim);
+};
 
 
 inline double stablePow(double a, double b) {        

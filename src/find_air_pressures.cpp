@@ -1,12 +1,12 @@
 #include <find_air_pressures.h>
-#include <vector>
 
-void find_air_pressures(std::vector<Eigen::Vector3i>& pressureIndices, Eigen::Vector3d& P0, Eigen::VectorXd& q,
+void find_air_pressures(std::set<int>& pressureIndices, Eigen::Vector3d& P0, Eigen::VectorXd& q,
                         const double dg) {
     int particles = q.size() / 3;
     double radius = dg / 2;
     Eigen::Vector3d grid_offset;
     grid_offset << 0.5, 0.5, 0.5;
+	pressureIndices.clear();
 
     for(int qi = 0; qi < particles; qi++) {
         // NOTE: there are potential duplicates
@@ -20,6 +20,6 @@ void find_air_pressures(std::vector<Eigen::Vector3i>& pressureIndices, Eigen::Ve
         double distance = (pressure_pos - particle_pos).norm();
 
         if(distance <= radius)
-            pressureIndices.push_back(cell_idx);
+            pressureIndices.insert(get_cell_idx(cell_idx(0), cell_idx(1), cell_idx(2), TENSOR_P_X, TENSOR_P_Y, TENSOR_P_Z));
     }
 }
