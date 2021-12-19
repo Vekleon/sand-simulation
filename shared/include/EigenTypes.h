@@ -79,6 +79,13 @@ inline int get_cell_idx(int x, int y, int z, int xDim, int yDim, int zDim) {
 	return x + (y * xDim) + (z * yDim * zDim);
 };
 
+inline void get_cell_idx(Eigen::Vector3i &out, int idx, int xDim, int yDim, int zDim) {
+	out <<
+		idx % xDim,
+		(idx / xDim) % yDim,
+		(idx / (xDim * yDim)) % zDim;
+};
+
 
 inline double stablePow(double a, double b) {        
     return static_cast<double> (std::pow(std::cbrt(static_cast<double>(a)),static_cast<double>(b)));

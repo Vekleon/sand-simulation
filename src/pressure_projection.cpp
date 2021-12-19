@@ -30,6 +30,7 @@ void pressure_projection(
 	Eigen::VectorXd d(xDimension * yDimension * zDimension);
 	Eigen::SparseMatrixd A;
 	Eigen::Matrix<double, 6, 6> PTP;
+	Eigen::Matrix<double, 6, 7> Dj; // A copy of D but accounting for ghost pressures
 	Eigen::Matrix<double, 1, 7> Aj;
 	std::vector<Eigen::Triplet<double>> triplets;
 
@@ -42,7 +43,6 @@ void pressure_projection(
 		for (int y = 0; y < yDimension; y++) {
 			for (int x = 0; x < xDimension; x++) {
 
-				//qj << xv.at(x)(y, z), xv.at(x + 1)(y, z), yv.at(x)(y, z), yv.at(x)(y + 1, z), zv.at(x)(y, z), zv.at(x)(y, z + 1);
 				qj <<
 					tensorAtOrZero(xv, x, y, z),
 					tensorAtOrZero(xv, x + 1, y, z),
@@ -52,9 +52,9 @@ void pressure_projection(
 					tensorAtOrZero(zv, x, y, z + 1);
 				d.coeffRef(get_p_idx(x, y, z)) = rho_over_dt * B.dot(qj);
 
-				// Solid boundary conditions
+				// Boundary consitions
 				PTP = P.at(x).at(y).at(z);
-				Aj = B * PTP * D;
+				Aj = B * PTP * Dj; // TODO: GHOST PRESSURES
 
 				// I think it's supposed to look something like this??? No idea what coefficient we put in here though.
 				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x - 1, y, z), get_p_idx(x, y, z), Aj(0)));
