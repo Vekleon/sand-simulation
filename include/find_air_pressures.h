@@ -12,5 +12,5 @@
     q: the generalized coordinates
     dg: the distance between points on the grid
 */
-void find_air_pressure(Eigen::MatrixXi& pressureIndices, Eigen::Vector3d& P0, Eigen::VectorXd& q,
+void find_air_pressures(Eigen::MatrixXi& pressureIndices, Eigen::Vector3d& P0, Eigen::VectorXd& q,
                         const double dg);
