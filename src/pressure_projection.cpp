@@ -22,7 +22,6 @@ void pressure_projection(
 			D.coeffRef(i, 6) *= -1.;
 		}
 	}
-	const Eigen::Matrix<double, 1, 7> Aj = B * D;
 
 	const int xDimension = pressure.size();
 	const int yDimension = pressure.at(0).rows();
@@ -30,10 +29,12 @@ void pressure_projection(
 	Eigen::Matrix<double, 6, 1> qj;
 	Eigen::VectorXd d(xDimension * yDimension * zDimension);
 	Eigen::SparseMatrixd A;
+	Eigen::Matrix<double, 6, 6> PTP;
+	Eigen::Matrix<double, 1, 7> Aj;
 	std::vector<Eigen::Triplet<double>> triplets;
 
-	auto get_cell_idx = [&xDimension, &yDimension, &zDimension](int x, int y, int z) {
-		return x + (y * xDimension) + (z * xDimension * yDimension);
+	auto get_p_idx = [&xDimension, &yDimension, &zDimension](int x, int y, int z) {
+		return get_cell_idx(x, y, z, xDimension, yDimension, zDimension);
 	};
 
 	// need to change bound limits because 4-7 pressure points can be calculated at a single time ??????
@@ -49,19 +50,20 @@ void pressure_projection(
 					tensorAtOrZero(yv, x, y + 1, z),
 					tensorAtOrZero(zv, x, y, z),
 					tensorAtOrZero(zv, x, y, z + 1);
-				d.coeffRef(get_cell_idx(x, y, z)) = rho_over_dt * B.dot(qj);
+				d.coeffRef(get_p_idx(x, y, z)) = rho_over_dt * B.dot(qj);
+
+				// Solid boundary conditions
+				PTP = P.at(x).at(y).at(z);
+				Aj = B * PTP * D;
 
 				// I think it's supposed to look something like this??? No idea what coefficient we put in here though.
-				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x - 1, y, z), get_cell_idx(x, y, z), Aj(0)));
-				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x, y, z), get_cell_idx(x + 1, y, z), Aj(1)));
-				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x, y - 1, z), get_cell_idx(x, y, z), Aj(2)));
-				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x, y, z), get_cell_idx(x, y + 1, z), Aj(3)));
-				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x, y, z - 1), get_cell_idx(x, y, z), Aj(4)));
-				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x, y, z), get_cell_idx(x, y, z + 1), Aj(5)));
-				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x, y, z), get_cell_idx(x, y, z),     Aj(6)));
-
-				// TODO: ACCOUNT FOR BOUNDARY CONDITIONS
-
+				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x - 1, y, z), get_p_idx(x, y, z), Aj(0)));
+				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z), get_p_idx(x + 1, y, z), Aj(1)));
+				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y - 1, z), get_p_idx(x, y, z), Aj(2)));
+				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z), get_p_idx(x, y + 1, z), Aj(3)));
+				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z - 1), get_p_idx(x, y, z), Aj(4)));
+				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z), get_p_idx(x, y, z + 1), Aj(5)));
+				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z), get_p_idx(x, y, z),     Aj(6)));
 			}
 		}
 	}
@@ -79,7 +81,7 @@ void pressure_projection(
 	for (int z = 0; z < zDimension; z++) {
 		for (int y = 0; y < yDimension; y++) {
 			for (int x = 0; x < xDimension; x++) {
-				tensorAt(pressure, x, y, z) = p(get_cell_idx(x, y, z));
+				tensorAt(pressure, x, y, z) = p(get_p_idx(x, y, z));
 			}
 		}
 	}
