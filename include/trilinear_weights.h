@@ -44,9 +44,13 @@ void trilinear_weights(std::array<double, 8> & weights, Eigen::Matrix<double, 8,
 
 
 inline int getCornerIndex(int x, int y, int z) {
-	return x * (2 << 2) + y * (2 << 1) + z * (2 << 0);
+	return x * (1 << 2) + y * (1 << 1) + z * (1 << 0);
 }
 
 inline void getBinaryIndices(Eigen::Vector3i indices, int cornerIndex) {
-	for (int i = 0; i < 3; i++) indices.coeffRef(i) = cornerIndex && 2 << i ? 1 : 0;
+	for (int i = 0; i < 3; i++) indices.coeffRef(i) = cornerIndex && 1 << i ? 1 : 0;
+}
+
+inline void roundVectorDown(Eigen::Vector3i& out, Eigen::Vector3d in) {
+	for (int i = 0; i < 3; i++) out.coeffRef(i) = std::floor(in.coeff(i));
 }

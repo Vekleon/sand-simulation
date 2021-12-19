@@ -1,14 +1,5 @@
 #include <particle_to_grid.h>
-#include "trilinear_weights.h"
-
-// Return the greatest distance along any one axist from A to B. Unsigned.
-double chebDist(Eigen::Vector3d A, Eigen::Vector3d B) {
-	return (A - B).cwiseAbs().maxCoeff();
-}
-
-void roundVectorDown(Eigen::Vector3i& out, Eigen::Vector3d in) {
-	for (int i = 0; i < 3; i++) out.coeffRef(i) = std::floor(in.coeff(i));
-}
+#include <trilinear_weights.h>
 
 void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv,
 	Eigen::Vector3d p0, double dg, Eigen::VectorXd q, Eigen::VectorXd qdot, 
@@ -78,7 +69,7 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 			for (int i = 0; i < 2; i++) {
 				for (int j = 0; j < 2; j++) {
 					for (int k = 0; k < 2; k++) {
-						//corners_matrix.row(getCornerIndex(i, j, k)) = dg * (cell_idx.cast<double>() + Eigen::Vector3d(i, j, k) + GRID_OFFSETS.row(gi)) + p0;
+						corners_matrix.row(getCornerIndex(i, j, k)) = dg * (cell_idx.cast<double>() + Eigen::Vector3d(i, j, k) + GRID_OFFSETS.row(gi).transpose()) + p0;
 					}
 				}
 			}
@@ -87,7 +78,6 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 			trilinear_weights(weights, corners_matrix, particle_pos);
 			Eigen::Vector3i corner_idx;
 			for (int wi = 0; wi < 8; wi++) {
-				int i, j, k;
 				getBinaryIndices(corner_idx, wi);
 				switch (gi) {
 					case 0:
@@ -108,7 +98,6 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 				}
 			}
 		}
-
 	}
 
 	// Divide by weights now...might be very slow :(
