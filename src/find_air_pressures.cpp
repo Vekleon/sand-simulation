@@ -13,10 +13,10 @@ void find_air_pressures(std::vector<Eigen::Vector3i>& pressureIndices, Eigen::Ve
         Eigen::Vector3d particle_pos = q.segment<3>(qi * 3);
         
         // finding the proper pressure index through particle positioning
-        Eigen::Vector3i cell_idx = ((1. / dg) * (particle_pos - P0 + grid_offset));
+        Eigen::Vector3i cell_idx = ((1. / dg) * (particle_pos - P0 + grid_offset)).cast<int>();
         cell_idx = cell_idx.cwiseAbs();
 
-        Eigen::Vector3d pressure_pos = P0 + dg * cell_idx;
+        Eigen::Vector3d pressure_pos = P0 + dg * cell_idx.cast<double>();
         double distance = (pressure_pos - particle_pos).norm();
 
         if(distance <= radius)
