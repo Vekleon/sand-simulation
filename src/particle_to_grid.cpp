@@ -91,16 +91,16 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 				getBinaryIndices(corner_idx, wi);
 				switch (gi) {
 					case 0:
-						tensorCoeffRef(xv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
-						tensorCoeffRef(count_x, corner_idx + cell_idx) += weights.at(wi);
+						tensorAt(xv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
+						tensorAt(count_x, corner_idx + cell_idx) += weights.at(wi);
 						break;
 					case 1:
-						tensorCoeffRef(yv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
-						tensorCoeffRef(count_y, corner_idx + cell_idx) += weights.at(wi);
+						tensorAt(yv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
+						tensorAt(count_y, corner_idx + cell_idx) += weights.at(wi);
 						break;
 					case 2:
-						tensorCoeffRef(zv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
-						tensorCoeffRef(count_z, corner_idx + cell_idx) += weights.at(wi);
+						tensorAt(zv, corner_idx + cell_idx) += weights.at(wi) * qdot(3 * pi + gi);
+						tensorAt(count_z, corner_idx + cell_idx) += weights.at(wi);
 						break;
 					default:
 						assert(false);
