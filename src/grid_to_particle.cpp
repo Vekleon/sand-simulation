@@ -4,8 +4,6 @@
 void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv,
 	Eigen::Vector3d p0, double dg, Eigen::VectorXd& q, Eigen::VectorXd& qdot) {
 
-
-
 	/*
 	Each row of this matrix represents the offset from p0 to the point on a velocity grid which is closest to the origin.
 	For example, the (0, 0, 0) point on the X-Velocity grid is equal to p0 - <0.5, 0.5, 0.0>.
