@@ -52,7 +52,7 @@ namespace Eigen {
 
 template <int X, int Y, int Z>
 inline float& tensorAt(std::array<Eigen::Matrix<float, Y, Z>, X>& tensor, Eigen::Vector3i idx) {
-	return tensorCoeffRef(tensor, idx(0), idx(1), idx(2));
+	return tensorAt(tensor, idx(0), idx(1), idx(2));
 }
 
 template <int X, int Y, int Z>
