@@ -66,4 +66,10 @@ void pressure_projection(
 
 	A.resize(xDimension * yDimension * zDimension, xDimension * yDimension * zDimension);
 	A.setFromTriplets(triplets.begin(), triplets.end());
+
+	Eigen::ConjugateGradient<Eigen::SparseMatrixd> solver;
+	solver.compute(A);
+	assert(solver.info() == Eigen::Success);
+	Eigen::VectorXd p = solver.solve(d);
+	assert(solver.info() == Eigen::Success);
 }
