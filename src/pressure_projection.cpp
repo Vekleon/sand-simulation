@@ -60,6 +60,8 @@ void pressure_projection(
 				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x, y, z), get_cell_idx(x, y, z + 1), Aj(5)));
 				triplets.push_back(Eigen::Triplet<double>(get_cell_idx(x, y, z), get_cell_idx(x, y, z),     Aj(6)));
 
+				// TODO: ACCOUNT FOR BOUNDARY CONDITIONS
+
 			}
 		}
 	}
@@ -73,5 +75,12 @@ void pressure_projection(
 	Eigen::VectorXd p = solver.solve(d);
 	assert(solver.info() == Eigen::Success);
 
-	// TODO: Translate p to pressure
+	// I think this is how we translate the p vector into the pressure grid, if we're staying consistent with how we assembled A and d
+	for (int z = 0; z < zDimension; z++) {
+		for (int y = 0; y < yDimension; y++) {
+			for (int x = 0; x < xDimension; x++) {
+				tensorAt(pressure, x, y, z) = p(get_cell_idx(x, y, z));
+			}
+		}
+	}
 }
