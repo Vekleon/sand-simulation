@@ -5,14 +5,10 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 	Eigen::Vector3d p0, double dg, Eigen::VectorXd& q, Eigen::VectorXd& qdot) {
 
 	/*
-	Each row of this matrix represents the offset from p0 to the point on a velocity grid which is closest to the origin.
-	For example, the (0, 0, 0) point on the X-Velocity grid is equal to p0 - <0.5, 0.5, 0.0>.
+	Each col of this matrix represents the offset from p0 to the point on a velocity grid which is closest to the origin.
+	For example, the (0, 0, 0) point on the X-Velocity grid is equal to p0 - <0.5, 0.0, 0.0>.
 	*/
-	Eigen::Matrix3d GRID_OFFSETS;
-	GRID_OFFSETS <<
-		0.5, 0.5, 0.0,
-		0.0, 0.5, 0.5,
-		0.5, 0.0, 0.5;
+	const Eigen::Matrix3d GRID_OFFSETS = 0.5 * Eigen::Matrix3d::Identity();
 	const int n = q.size() / 3;
 
 	Eigen::Matrix<double, 8, 3> corners_matrix;
@@ -31,11 +27,11 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 		for (int gi = 0; gi < 3; gi++) {
 
 			// Index the current cell by identifying the corner closest to the origin
-			roundVectorDown(cell_idx, (1. / dg) * (particle_pos - p0) - GRID_OFFSETS.row(gi).transpose());
+			roundVectorDown(cell_idx, (1. / dg) * (particle_pos - p0) + GRID_OFFSETS.col(gi));
 			for (int i = 0; i < 2; i++) {
 				for (int j = 0; j < 2; j++) {
 					for (int k = 0; k < 2; k++) {
-						corners_matrix.row(getCornerIndex(i, j, k)) = dg * (cell_idx.cast<double>() + Eigen::Vector3d(i, j, k) + GRID_OFFSETS.row(gi).transpose()) + p0;
+						corners_matrix.row(getCornerIndex(i, j, k)) = dg * (cell_idx.cast<double>() + Eigen::Vector3d(i, j, k) - GRID_OFFSETS.col(gi)) + p0;
 					}
 				}
 			}
@@ -47,12 +43,15 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 				getBinaryIndices(corner_idx, wi);
 				switch (gi) {
 					case 0:
+						if (!validCoordinates(xv, corner_idx + cell_idx)) continue;
 						qdot.coeffRef(3 * pi + gi) += weights.at(wi) * tensorAt(xv, corner_idx + cell_idx);
 						break;
 					case 1:
+						if (!validCoordinates(yv, corner_idx + cell_idx)) continue;
 						qdot.coeffRef(3 * pi + gi) += weights.at(wi) * tensorAt(yv, corner_idx + cell_idx);
 						break;
 					case 2:
+						if (!validCoordinates(zv, corner_idx + cell_idx)) continue;
 						qdot.coeffRef(3 * pi + gi) += weights.at(wi) * tensorAt(zv, corner_idx + cell_idx);
 						break;
 					default:

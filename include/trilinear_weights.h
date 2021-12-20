@@ -18,11 +18,11 @@
 	|     \             |     \
 	|       \           |       \
 	|         \         |         \
-	|           C001- - - - - - -C101
+	|           C010- - - - - - -C110
 	|           |       |           |
 	|           |       |           |
 	|           |       |           |
-	C010- - - - | - -C110           |
+	C001- - - - | - -C101           |
 	  \         |         \         |
 		\       |           \       |
 		  \     |             \     |
@@ -30,7 +30,7 @@
 			  \ |                 \ |
 				C000- - - - - - -C100
 
-	In this diagram X goes left/right, Y goes forward/back, Z goes up/down.
+	In this diagram X goes left/right, Y goes up/down, Z goes forward/back.
 
 	OUTPUT:
 	weights - an 8-long array of weights.

@@ -57,6 +57,11 @@ inline bool validCoordinates(std::array<Eigen::Matrix<float, Y, Z>, X>& tensor, 
 }
 
 template <int X, int Y, int Z>
+inline bool validCoordinates(std::array<Eigen::Matrix<float, Y, Z>, X>& tensor, Eigen::Vector3i idx) {
+	return validCoordinates(tensor, idx(0), idx(1), idx(2));
+}
+
+template <int X, int Y, int Z>
 inline float tensorAtOrZero(std::array<Eigen::Matrix<float, Y, Z>, X>& tensor, int x, int y, int z) {
 	if (validCoordinates(tensor, x, y, z)) return tensorAt(tensor, x, y, z);
 	return 0.0;
