@@ -1,5 +1,5 @@
 #include <frictional_stress.h>
-#include <cmath>
+#include <math.h>
 
 void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map, 
                         Eigen::TensorP& P, Eigen::TensorXV& xv, Eigen::TensorYV& yv, 
@@ -35,15 +35,15 @@ void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map,
                 D = (u + u.transpose()) / 2;
                 rigid_stress = density * D * dg * dg / dt;
                 double mean = rigid_stress.trace() / 3;
-                double shear = (rigid_stress - mean * Eigen::Matrix3d::Identity()).norm() / std::sqrt(2);
+                double shear = (rigid_stress - mean * Eigen::Matrix3d::Identity()).norm() / sqrt(2);
                 
-                double left = std::sqrt(3) * shear;
+                double left = sqrt(3) * shear;
                 double right = friction_angle * mean + cohesion;
                 if(left < right) {
                     stress[x][y][z] = rigid_stress;
                     rigid_map[x][y][z] = true;
                 } else {
-                    double denominator = std::sqrt(1/3) * D.norm();
+                    double denominator = sqrt(1/3) * D.norm();
                     stress[x][y][z] = - friction_angle * P.at(x)(y, z) * D / denominator;
                     rigid_map[x][y][z] = false;
                 }

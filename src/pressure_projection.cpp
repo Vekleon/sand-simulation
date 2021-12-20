@@ -1,4 +1,5 @@
 #include <pressure_projection.h>
+#include <math.h>
 
 void pressure_projection(
 	Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv, Eigen::TensorP& pressure,
@@ -77,7 +78,8 @@ void pressure_projection(
 				if(pressure_indices.find(get_p_idx(x, y, z)) != pressure_indices.end()) zeros += 64;
 
 				for(int i = 1; i < 8; i++){
-					if(std::pow(2, i) & zeros) Dj.col(i - 1).setZero();
+					int result = pow(2, i);
+					if(result & zeros) Dj.col(i - 1).setZero();
 				}
 
 				Aj = B * PTP * Dj; // TODO: GHOST PRESSURES
