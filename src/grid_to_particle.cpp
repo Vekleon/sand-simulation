@@ -15,11 +15,12 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 		0.5, 0.0, 0.5;
 	const int n = q.size() / 3;
 
-	qdot.setZero();
-
 	Eigen::Matrix<double, 8, 3> corners_matrix;
 	std::array<double, 8> weights;
 	Eigen::Vector3i cell_idx;
+	Eigen::VectorXd total_weights(qdot.size());
+	total_weights.setConstant(1e-32);
+	qdot.setZero();
 
 	// For each particle P
 	for (int pi = 0; pi < n; pi++) {
@@ -58,8 +59,10 @@ void particle_to_grid(Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV&
 						assert(false);
 						break;
 				}
+				total_weights.coeffRef(3 * pi + gi) += weights.at(wi);
 			}
 		}
 	}
 
+	qdot = qdot.cwiseQuotient(total_weights);
 }
