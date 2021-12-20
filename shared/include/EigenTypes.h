@@ -48,7 +48,11 @@ namespace Eigen {
 	using TensorZV = std::array<Eigen::Matrix<double, TENSOR_ZV_Y, TENSOR_ZV_Z>, TENSOR_ZV_X>;
 	using TensorP = std::array<Eigen::Matrix<double, TENSOR_P_Y, TENSOR_P_Z>, TENSOR_P_X>;
 	using TensorPB = std::array<std::array<std::array<Eigen::Matrix<double, 6, 6>, TENSOR_P_Z>, TENSOR_P_Y>, TENSOR_P_X>;
-
+    
+    // Used to store whether a grid cell is rigid or not
+    using TensorRF = std::array<std::array<std::array<bool, TENSOR_P_Z>, TENSOR_P_Y>, TENSOR_P_X>;
+    // Used to store the grid stress
+    using TensorS = std::array<std::array<std::array<Eigen::Matrix<double, 3, 3>, TENSOR_P_Z>, TENSOR_P_Y>, TENSOR_P_X>;
 }
 
 template <int X, int Y, int Z>

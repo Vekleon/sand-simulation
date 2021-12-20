@@ -6,22 +6,19 @@
     Calculates the frictional stress matrix for the particles 
 
     OUTPUT:
-    stress: the stress matrix to be calculated
-    mean_stress: the mean stress of the stress matrix
-    shear_stress: the shear stress of the system
+    stress: the stress tensor used to store calculated stress for each grid cell
+    rigid_map: a tensor used to tell us whether a cell is rigid or not
 
     INPUT:
-    q: the generalized coordinates of the particles in the system
-    qdot: the velocity vectors of the particles
-    p0: the corner coordinate of the pressure grid
     P: a tensure holding values for the particle grid
     xv: (X+1) * Y * Z tensor of x-component velocities
     yv: X * (Y+1) * Z tensor of y-component velocities
     zv: X * Y * (Z+1) tensor of z-component velocities
     dg: the length of each grid cell.
+    density: the density of our sand
+    dt: the timestep size
  */
 
-void frictional_stress(Eigen::MatrixXd& stress, double& mean_stress, double& shear_stress, 
-                        Eigen::VectorXd q, Eigen::VectorXd qdot,
-                        Eigen::Vector3d p0, Eigen::TensorP& P, Eigen::TensorXV& xv, 
-                        Eigen::TensorYV& yv, Eigen::TensorZV& zv, const double dg);
+void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map, 
+                        Eigen::TensorP& P, Eigen::TensorXV& xv, Eigen::TensorYV& yv, 
+                        Eigen::TensorZV& zv, const double dg, const double density, double dt);
