@@ -13,6 +13,7 @@
 template<typename FORCE> 
 inline void forward_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, double mass,  FORCE &force) {
 	Eigen::VectorXd resultingForce;
+    // TODO replace force with the appropriate substitution
 	force(resultingForce, q, qdot);
 
 	q = q + dt * qdot;

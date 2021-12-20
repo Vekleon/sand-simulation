@@ -16,6 +16,7 @@ inline void runge_kutta(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, do
     Eigen::VectorXd k1Force, k2Force, k3Force, k4Force;
     Eigen::VectorXd totalV, totalA, v2, v3;
 
+    // TODO replace force with the appropriate substitution
     force(k1Force, q, qdot);
     totalV = qdot;
     totalA = k1Force / mass;
