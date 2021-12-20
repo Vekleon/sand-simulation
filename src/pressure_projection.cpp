@@ -77,9 +77,13 @@ void pressure_projection(
 				if(pressure_indices.find(get_p_idx(x, y, z + 1)) != pressure_indices.end()) zeros += 32;
 				if(pressure_indices.find(get_p_idx(x, y, z)) != pressure_indices.end()) zeros += 64;
 
-				for(int i = 1; i < 8; i++){
-					int result = pow(2, i);
-					if(result & zeros) Dj.col(i - 1).setZero();
+				for(int i = 2; i < 128; i *= 2){
+					if(i & zeros) Dj.col(i - 1).setZero();
+				}
+
+				// checks if the last column is 0'ed out
+				if(!(zeros & 64)) {
+					//TODO: get air prsesures and add 'em.
 				}
 
 				Aj = B * PTP * Dj; // TODO: GHOST PRESSURES
