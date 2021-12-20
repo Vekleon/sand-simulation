@@ -17,8 +17,10 @@
     dg: the length of each grid cell.
     density: the density of our sand
     dt: the timestep size
+    cohesion: the cohesion coefficient.
  */
 
 void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map, 
                         Eigen::TensorP& P, Eigen::TensorXV& xv, Eigen::TensorYV& yv, 
-                        Eigen::TensorZV& zv, const double dg, const double density, double dt);
+                        Eigen::TensorZV& zv, const double dg, const double density, 
+                        double dt, double friction_angle, const double cohesion);

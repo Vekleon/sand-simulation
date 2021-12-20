@@ -3,14 +3,9 @@
 
 void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map, 
                         Eigen::TensorP& P, Eigen::TensorXV& xv, Eigen::TensorYV& yv, 
-                        Eigen::TensorZV& zv, const double dg, const double density, double dt) {
-    Eigen::MatrixXd GRID_OFFSETS(4, 3);
-	GRID_OFFSETS <<
-		0.5, 0.5, 0.0,
-		0.0, 0.5, 0.5,
-		0.5, 0.0, 0.5,
-        0.5, 0.5, 0.5;
-
+                        Eigen::TensorZV& zv, const double dg, const double density, 
+                        double dt, double friction_angle, const double cohesion) {
+    // constructs the velocity divergence matrix.
     auto construct_u = [&xv, &yv, &zv](Eigen::Matrix3d& u, int x, int y, int z) {
         double x_base = xv.at(x)(y, z);
         double y_base = yv.at(x)(y, z);
@@ -30,6 +25,8 @@ void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map,
     int x_dimension = P.size();
     int y_dimension = P.at(0).rows();
     int z_dimension = P.at(0).cols();
+
+    // Calculate the friction value of every grid point.
     for(int z = 0; z < z_dimension; z++){
         for(int y = 0; y < y_dimension; y++){
             for(int x = 0; x < x_dimension; x++){
@@ -38,7 +35,18 @@ void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map,
                 D = (u + u.transpose()) / 2;
                 rigid_stress = density * D * dg * dg / dt;
                 double mean = rigid_stress.trace() / 3;
+                double shear = (rigid_stress - mean * Eigen::Matrix3d::Identity()).norm() / std::sqrt(2);
                 
+                double left = std::sqrt(3) * shear;
+                double right = friction_angle * mean + cohesion;
+                if(left < right) {
+                    stress[x][y][z] = rigid_stress;
+                    rigid_map[x][y][z] = true;
+                } else {
+                    double denominator = std::sqrt(1/3) * D.norm();
+                    stress[x][y][z] = - friction_angle * P.at(x)(y, z) * D / denominator;
+                    rigid_map[x][y][z] = false;
+                }
             }
         }
     }
