@@ -65,7 +65,7 @@ void pressure_projection(
 				PTP = P.at(x).at(y).at(z);
 				// A copy of D but accounting for ghost pressures
 				Eigen::Matrix<double, 6, 7> Dj = D;
-				// a bit array to zero to figure out which columns we have to zero out
+				// a bit array to figure out which columns we have to zero out
 				// not sure if this would be better than using a vector 
 				char zeros = 0;
 
