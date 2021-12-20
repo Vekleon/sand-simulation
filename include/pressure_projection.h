@@ -1,6 +1,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <EigenTypes.h>
+#include <set>
 
 /*
 	Performs pressure projection
@@ -17,6 +18,6 @@
 	dz: distance along axis between positions on zv
 */
 void pressure_projection(
-	Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv, Eigen::TensorP& pressures,
-	Eigen::VectorXd& q, Eigen::VectorXd& qdot, Eigen::TensorPB& P,
+	Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv, Eigen::TensorP& pressure,
+	std::set<int>& pressureIndices, Eigen::VectorXd& q, Eigen::VectorXd& qdot, Eigen::TensorPB& P,
 	const double dg, const double density, const double dt);

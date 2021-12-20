@@ -2,7 +2,7 @@
 
 void pressure_projection(
 	Eigen::TensorXV& xv, Eigen::TensorYV& yv, Eigen::TensorZV& zv, Eigen::TensorP& pressure,
-	Eigen::VectorXd& q, Eigen::VectorXd& qdot, Eigen::TensorPB& P,
+	std::set<int>& pressure_indices, Eigen::VectorXd& q, Eigen::VectorXd& qdot, Eigen::TensorPB& P,
 	const double dg, const double density, const double dt){
     // TODO
 
@@ -38,7 +38,6 @@ void pressure_projection(
 	Eigen::VectorXd d(xDimension * yDimension * zDimension);
 	Eigen::SparseMatrixd A;
 	Eigen::Matrix<double, 6, 6> PTP;
-	Eigen::Matrix<double, 6, 7> Dj; // A copy of D but accounting for ghost pressures
 	Eigen::Matrix<double, 1, 7> Aj;
 	std::vector<Eigen::Triplet<double>> triplets;
 
@@ -50,7 +49,6 @@ void pressure_projection(
 	for (int z = 0; z < zDimension; z++) {
 		for (int y = 0; y < yDimension; y++) {
 			for (int x = 0; x < xDimension; x++) {
-
 				const int cur_row = get_p_idx(x, y, z);
 
 				qj <<
@@ -64,6 +62,24 @@ void pressure_projection(
 
 				// Boundary consitions
 				PTP = P.at(x).at(y).at(z);
+				// A copy of D but accounting for ghost pressures
+				Eigen::Matrix<double, 6, 7> Dj = D;
+				// a bit array to zero to figure out which columns we have to zero out
+				// not sure if this would be better than using a vector 
+				char zeros = 0;
+
+				if(pressure_indices.find(get_p_idx(x - 1, y, z)) != pressure_indices.end()) zeros += 1;
+				if(pressure_indices.find(get_p_idx(x + 1, y, z)) != pressure_indices.end()) zeros += 2;
+				if(pressure_indices.find(get_p_idx(x, y - 1, z)) != pressure_indices.end()) zeros += 4;
+				if(pressure_indices.find(get_p_idx(x, y + 1, z)) != pressure_indices.end()) zeros += 8;
+				if(pressure_indices.find(get_p_idx(x, y, z - 1)) != pressure_indices.end()) zeros += 16;
+				if(pressure_indices.find(get_p_idx(x, y, z + 1)) != pressure_indices.end()) zeros += 32;
+				if(pressure_indices.find(get_p_idx(x, y, z)) != pressure_indices.end()) zeros += 64;
+
+				for(int i = 1; i < 8; i++){
+					if(std::pow(2, i) && zeros) Dj.col(i - 1).setZero();
+				}
+
 				Aj = B * PTP * Dj; // TODO: GHOST PRESSURES
 
 				// Assemble the current row of A
