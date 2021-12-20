@@ -51,6 +51,8 @@ void pressure_projection(
 		for (int y = 0; y < yDimension; y++) {
 			for (int x = 0; x < xDimension; x++) {
 
+				const int cur_row = get_p_idx(x, y, z);
+
 				qj <<
 					tensorAtOrZero(xv, x, y, z),
 					tensorAtOrZero(xv, x + 1, y, z),
@@ -58,22 +60,19 @@ void pressure_projection(
 					tensorAtOrZero(yv, x, y + 1, z),
 					tensorAtOrZero(zv, x, y, z),
 					tensorAtOrZero(zv, x, y, z + 1);
-				d.coeffRef(get_p_idx(x, y, z)) = rho_over_dt * B.dot(qj);
+				d.coeffRef(cur_row) = rho_over_dt * B.dot(qj);
 
 				// Boundary consitions
 				PTP = P.at(x).at(y).at(z);
 				Aj = B * PTP * Dj; // TODO: GHOST PRESSURES
 
 				// Assemble the current row of A
-				const int cur_row = get_p_idx(x, y, z);
 				for (int i = 0; i < corner_coord_offsets.size(); i++) {
 					int cur_x = x + corner_coord_offsets.at(i)(0);
 					int cur_y = y + corner_coord_offsets.at(i)(1);
 					int cur_z = z + corner_coord_offsets.at(i)(2);
 					// It's possible to go out of bounds so let's not do that
-					if (cur_x < 0 || cur_x > xDimension || 
-						cur_y < 0 || cur_y > yDimension || 
-						cur_z < 0 || cur_z > zDimension) continue;
+					if (!validCoordinates(pressure, cur_x, cur_y, cur_z)) continue;
 					int cur_col = get_p_idx(cur_x, cur_y, cur_z);
 					triplets.push_back(Eigen::Triplet<double>(cur_row, cur_col, Aj(i)));
 				}
@@ -99,5 +98,24 @@ void pressure_projection(
 		}
 	}
 
-	// TODO: ACTUALLY COMPUTE v^{t+1}
+	// Compute v^{t+1} on the grid
+	const double dt_over_rho = dt / density;
+	for (int z = 0; z < zDimension + 1; z++) {
+		for (int y = 0; y < yDimension + 1; y++) {
+			for (int x = 0; x < xDimension + 1; x++) {
+				// UPDATE X
+				if (validCoordinates(xv, x, y, z)) {
+					tensorAt(xv, x, y, z) -= dt_over_rho * dg_inv * (tensorAtOrZero(pressure, x, y, z) - tensorAtOrZero(pressure, x - 1, y, z));
+				}
+				// UPDATE Y
+				if (validCoordinates(yv, x, y, z)) {
+					tensorAt(yv, x, y, z) -= dt_over_rho * dg_inv * (tensorAtOrZero(pressure, x, y, z) - tensorAtOrZero(pressure, x, y - 1, z));
+				}
+				// UPDATE Z
+				if (validCoordinates(zv, x, y, z)) {
+					tensorAt(zv, x, y, z) -= dt_over_rho * dg_inv * (tensorAtOrZero(pressure, x, y, z) - tensorAtOrZero(pressure, x, y, z - 1));
+				}
+			}
+		}
+	}
 }
