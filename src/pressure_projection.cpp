@@ -22,6 +22,14 @@ void pressure_projection(
 			D.coeffRef(i, 6) *= -1.;
 		}
 	}
+	std::array<Eigen::Vector3i, 7> corner_coord_offsets;
+	corner_coord_offsets.at(0) = Eigen::Vector3i(-1, 0, 0);
+	corner_coord_offsets.at(1) = Eigen::Vector3i(+1, 0, 0);
+	corner_coord_offsets.at(2) = Eigen::Vector3i(0, -1, 0);
+	corner_coord_offsets.at(3) = Eigen::Vector3i(0, +1, 0);
+	corner_coord_offsets.at(4) = Eigen::Vector3i(0, 0, -1);
+	corner_coord_offsets.at(5) = Eigen::Vector3i(0, 0, +1);
+	corner_coord_offsets.at(6) = Eigen::Vector3i::Zero();
 
 	const int xDimension = pressure.size();
 	const int yDimension = pressure.at(0).rows();
@@ -56,14 +64,19 @@ void pressure_projection(
 				PTP = P.at(x).at(y).at(z);
 				Aj = B * PTP * Dj; // TODO: GHOST PRESSURES
 
-				// I think it's supposed to look something like this??? No idea what coefficient we put in here though.
-				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x - 1, y, z), get_p_idx(x, y, z), Aj(0)));
-				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z), get_p_idx(x + 1, y, z), Aj(1)));
-				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y - 1, z), get_p_idx(x, y, z), Aj(2)));
-				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z), get_p_idx(x, y + 1, z), Aj(3)));
-				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z - 1), get_p_idx(x, y, z), Aj(4)));
-				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z), get_p_idx(x, y, z + 1), Aj(5)));
-				triplets.push_back(Eigen::Triplet<double>(get_p_idx(x, y, z), get_p_idx(x, y, z),     Aj(6)));
+				// Assemble the current row of A
+				const int cur_row = get_p_idx(x, y, z);
+				for (int i = 0; i < corner_coord_offsets.size(); i++) {
+					int cur_x = x + corner_coord_offsets.at(i)(0);
+					int cur_y = y + corner_coord_offsets.at(i)(1);
+					int cur_z = z + corner_coord_offsets.at(i)(2);
+					// It's possible to go out of bounds so let's not do that
+					if (cur_x < 0 || cur_x > xDimension || 
+						cur_y < 0 || cur_y > yDimension || 
+						cur_z < 0 || cur_z > zDimension) continue;
+					int cur_col = get_p_idx(cur_x, cur_y, cur_z);
+					triplets.push_back(Eigen::Triplet<double>(cur_row, cur_col, Aj(i)));
+				}
 			}
 		}
 	}
