@@ -77,7 +77,7 @@ void pressure_projection(
 				if(pressure_indices.find(get_p_idx(x, y, z)) != pressure_indices.end()) zeros += 64;
 
 				for(int i = 1; i < 8; i++){
-					if(std::pow(2, i) && zeros) Dj.col(i - 1).setZero();
+					if(std::pow(2, i) & zeros) Dj.col(i - 1).setZero();
 				}
 
 				Aj = B * PTP * Dj; // TODO: GHOST PRESSURES
