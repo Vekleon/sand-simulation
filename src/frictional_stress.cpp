@@ -30,15 +30,20 @@ void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map,
     for(int z = 0; z < z_dimension; z++){
         for(int y = 0; y < y_dimension; y++){
             for(int x = 0; x < x_dimension; x++){
+                // construct the D matrix
                 construct_u(u, x, y , z);
                 u /= dg;
                 D = (u + u.transpose()) / 2;
+
+                // calculate the rigid stress
                 rigid_stress = density * D * dg * dg / dt;
                 double mean = rigid_stress.trace() / 3;
                 double shear = (rigid_stress - mean * Eigen::Matrix3d::Identity()).norm() / sqrt(2);
                 
+                // see if the rigid stress satisfies the yield requirement
                 double left = sqrt(3) * shear;
                 double right = friction_angle * mean + cohesion;
+                // update the stress tensor and the rigid grid mapping appropriately
                 if(left < right) {
                     stress[x][y][z] = rigid_stress;
                     rigid_map[x][y][z] = true;
