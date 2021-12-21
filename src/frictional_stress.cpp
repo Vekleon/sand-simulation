@@ -9,7 +9,7 @@ void frictional_stress(Eigen::TensorS& stress, Eigen::TensorRF rigid_map,
     auto construct_u = [&xv, &yv, &zv](Eigen::Matrix3d& u, int x, int y, int z) {
         double x_base = xv.at(x)(y, z);
         double y_base = yv.at(x)(y, z);
-        double z_base = yv.at(x)(y, z);
+        double z_base = zv.at(x)(y, z);
         u(0, 0) = xv.at(x + 1)(y, z) - x_base;
         u(0, 1) = xv.at(x)(y + 1, z) - x_base;
         u(0, 2) = xv.at(x)(y, z + 1) - x_base;
