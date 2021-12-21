@@ -80,20 +80,20 @@ int main(int argc, char **argv) {
     std::cout<<"sand-simulation\n";
 
     //load geometric data 
-    igl::readMESH("../../data/sand_bunny.mesh",V,T, F);
+    igl::readMESH("../../data/coarse_bunny.mesh",V,T, F);
     igl::boundary_facets(T, F);
-    //F = F.rowwise().reverse().eval();
-    // igl::edges(T,E);
-    // igl::edge_lengths(V,E,l0);
+    F = F.rowwise().reverse().eval();
+    igl::edges(T,E);
+    igl::edge_lengths(V,E,l0);
 
     //setup simulation 
     init_state(q,qdot,V);
     
     //setup constraint matrix
-    find_min_vertices(fixed_point_indices, V, 3);
-    P.resize(q.rows(),q.rows());
-    P.setIdentity();
-    fixed_point_constraints(P, q.rows(), fixed_point_indices);
+    // find_min_vertices(fixed_point_indices, V, 3);
+    // P.resize(q.rows(),q.rows());
+    // P.setIdentity();
+    // fixed_point_constraints(P, q.rows(), fixed_point_indices);
 
     x0 = q - P.transpose()*P*q; //vector x0 contains position of all fixed nodes, zero for everything else
     
