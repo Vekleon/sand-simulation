@@ -30,8 +30,7 @@ namespace Visualize {
     
     void setup(const Eigen::VectorXd &q, const Eigen::VectorXd &qdot, bool ps_plot = false);
 
-    void add_object_to_scene(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, const Eigen::MatrixXd &V_skin, 
-                             const Eigen::MatrixXi &F_skin,  const Eigen::SparseMatrixd &N, Eigen::RowVector3d color);
+    void add_object_to_scene(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, Eigen::RowVector3d color);
     
     //animate geometry using physics simulation
     void rigid_transform_1d(unsigned int id, double x);
@@ -40,8 +39,6 @@ namespace Visualize {
 
     void update_vertex_positions(unsigned int id, Eigen::Ref<const Eigen::VectorXd> pos);
 
-    void set_picking_tolerance(double);
-    
     //UI methods
     bool mouse_down(igl::opengl::glfw::Viewer &viewer, int x, int y);
     
@@ -51,8 +48,6 @@ namespace Visualize {
 
     igl::opengl::glfw::Viewer & viewer();
 
-    igl::opengl::glfw::imgui::ImGuiMenu & viewer_menu();
-
     const Eigen::Vector3d & mouse_world();
     
     const Eigen::Vector3d & mouse_drag_world();
@@ -61,8 +56,6 @@ namespace Visualize {
     const std::vector<unsigned int> & picked_vertices(); 
 
     bool is_mouse_dragging();
-
-    void toggle_skinning(bool skinning);
 }
 
 

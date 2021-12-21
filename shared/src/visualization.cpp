@@ -8,11 +8,6 @@ namespace Visualize {
     
     //meshes in the scene 
     std::vector<std::pair<Eigen::MatrixXd, Eigen::MatrixXi> > g_geometry;
-    std::vector<Eigen::RowVector3d> g_color;
-    std::vector<std::pair<Eigen::MatrixXd, Eigen::MatrixXi> > g_skin;
-    std::vector<Eigen::SparseMatrixd> g_N;
-    bool g_skinning = true;
-
     std::vector<unsigned int> g_id; //id into libigl for these meshes 
 
     //picking variables 
@@ -29,15 +24,12 @@ namespace Visualize {
 
     //mouse UI state variables
     bool g_mouse_dragging = false;
-    double g_picking_tol = 0.001;
     Eigen::Vector3d g_mouse_win; //mouse window coordinates
     Eigen::Vector3d g_mouse_drag; //last mouse drag vector 
     Eigen::Vector3d g_mouse_world; 
     Eigen::Vector3d g_mouse_drag_world; //mouse drag delta in the world space 
 
 }
-
-igl::opengl::glfw::imgui::ImGuiMenu & Visualize::viewer_menu() { return menu; }
 
 igl::opengl::glfw::Viewer & Visualize::viewer() { return g_viewer; }
 
@@ -305,6 +297,33 @@ bool Visualize::plot_phase_space(const char *label, ImVec2 q_bounds, ImVec2 q_do
             menu.draw_viewer_menu();
         };
 
+        if(ps_plot) {
+            // Add content to the default menu window
+            menu.callback_draw_custom_window = [&]()
+            {
+                // Define next window position + size
+                ImGui::SetNextWindowPos(ImVec2(180.f * menu.menu_scaling(), 10), ImGuiSetCond_FirstUseEver);
+                ImGui::SetNextWindowSize(ImVec2(800, 500), ImGuiSetCond_FirstUseEver);
+                ImGui::Begin(
+                    "Energy Plot", nullptr,
+                    ImGuiWindowFlags_NoSavedSettings
+
+                );
+
+                ImVec2 min = ImGui::GetWindowContentRegionMin();
+                ImVec2 max = ImGui::GetWindowContentRegionMax();
+
+                max.x = ( max.x - min.x ) / 2;
+                max.y -= min.y + ImGui::GetItemsLineHeightWithSpacing() * 3;
+
+                Visualize::plot_energy("T", 1, ImVec2(-15,10), ImVec2(0,2e6), ImGui::GetColorU32(ImGuiCol_PlotLines));
+                Visualize::plot_energy("V", 2, ImVec2(-15,10), ImVec2(0,2e6), ImGui::GetColorU32(ImGuiCol_HeaderActive));
+                Visualize::plot_energy("T+V", 3, ImVec2(-15,10), ImVec2(0,4e6), ImGui::GetColorU32(ImGuiCol_ColumnActive));
+
+                ImGui::End();
+            };
+        }
+
         Visualize::g_viewer.callback_mouse_down = mouse_down;
         Visualize::g_viewer.callback_mouse_up = mouse_up;
         Visualize::g_viewer.callback_mouse_move = mouse_move;
@@ -313,10 +332,7 @@ bool Visualize::plot_phase_space(const char *label, ImVec2 q_bounds, ImVec2 q_do
         Visualize::g_viewer.core().is_animating = true;
     }
 
-    void Visualize::add_object_to_scene(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, 
-                                        const Eigen::MatrixXd &V_skin, const Eigen::MatrixXi &F_skin, 
-                                        const Eigen::SparseMatrixd &N,
-                                        Eigen::RowVector3d color) {
+    void Visualize::add_object_to_scene(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, Eigen::RowVector3d color) {
 
         //add mesh to libigl and store id for access later
         if(g_geometry.size() == 0) {
@@ -325,14 +341,11 @@ bool Visualize::plot_phase_space(const char *label, ImVec2 q_bounds, ImVec2 q_do
             g_id.push_back(g_viewer.append_mesh());
         }
 
-        g_viewer.data().set_mesh(V_skin,F_skin);
+        g_viewer.data().set_mesh(V,F);
         g_viewer.data().set_colors(color);
 
         //add mesh to geometry vector
         g_geometry.push_back(std::make_pair(V,F));
-        g_color.push_back(color);
-        g_skin.push_back(std::make_pair(V_skin,F_skin));
-        g_N.push_back(N);
 
     }
 
@@ -363,13 +376,8 @@ bool Visualize::plot_phase_space(const char *label, ImVec2 q_bounds, ImVec2 q_do
 
         //update vertex positions
         for(unsigned int ii=0; ii<g_geometry[id].first.rows(); ++ii) {
-            g_geometry[g_id[id]].first.row(ii) = pos.segment<3>(3*ii).transpose();
+            g_viewer.data_list[g_id[id]].V.row(ii) = pos.segment<3>(3*ii).transpose();
          }
-
-        if(g_skinning) 
-            g_viewer.data_list[g_id[id]].V = g_N[id]*g_geometry[g_id[id]].first;
-        else
-            g_viewer.data_list[g_id[id]].V = g_geometry[g_id[id]].first;
 
          //tell viewer to update
          g_viewer.data_list[g_id[id]].dirty |= igl::opengl::MeshGL::DIRTY_POSITION;
@@ -379,10 +387,6 @@ bool Visualize::plot_phase_space(const char *label, ImVec2 q_bounds, ImVec2 q_do
         return g_picked_vertices;
     }
     
-    void Visualize::set_picking_tolerance(double r) {
-        g_picking_tol = r;
-    }
-
     bool Visualize::mouse_down(igl::opengl::glfw::Viewer &viewer, int x, int y) {
         
         g_mouse_win = Eigen::Vector3d(g_viewer.current_mouse_x,viewer.core().viewport(3) - g_viewer.current_mouse_y,0.);
@@ -396,7 +400,7 @@ bool Visualize::plot_phase_space(const char *label, ImVec2 q_bounds, ImVec2 q_do
         //if you click on the mesh select the vertex, otherwise do nothing
         if(pick_nearest_vertices(g_picked_vertices, g_mouse_win, 
                                  g_viewer.core().view, g_viewer.core().proj, g_viewer.core().viewport,
-                                 g_geometry[0].first, g_geometry[0].second, g_picking_tol)) {
+                                 g_viewer.data().V, g_geometry[0].second, 0.1)) {
 
             g_selected_obj = 0;
             g_mouse_dragging = true; 
@@ -455,22 +459,4 @@ bool Visualize::plot_phase_space(const char *label, ImVec2 q_bounds, ImVec2 q_do
 
     bool Visualize::is_mouse_dragging() {
         return g_mouse_dragging;
-    }
-
-    void Visualize::toggle_skinning(bool skinning) {
-        g_skinning = skinning;
-
-        if(!skinning) {
-            for(unsigned int ii=0; ii<g_geometry.size(); ++ii) {
-                g_viewer.data_list[g_id[ii]].clear();
-                g_viewer.data_list[g_id[ii]].set_mesh(g_geometry[ii].first,g_geometry[ii].second);
-                g_viewer.data_list[g_id[ii]].set_colors(g_color[ii]);
-            }
-        } else {
-            for(unsigned int ii=0; ii<g_geometry.size(); ++ii) {
-                g_viewer.data_list[g_id[ii]].clear();
-                g_viewer.data_list[g_id[ii]].set_mesh(g_skin[ii].first,g_skin[ii].second);
-                g_viewer.data_list[g_id[ii]].set_colors(g_color[ii]);
-            }
-        }
     }

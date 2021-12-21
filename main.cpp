@@ -90,9 +90,9 @@ int main(int argc, char **argv) {
     init_state(q,qdot,V);
     
     //setup constraint matrix
-    // find_min_vertices(fixed_point_indices, V, 3);
-    // P.resize(q.rows(),q.rows());
-    // P.setIdentity();
+     find_min_vertices(fixed_point_indices, V, 3);
+     P.resize(q.rows(),q.rows());
+     P.setIdentity();
     // fixed_point_constraints(P, q.rows(), fixed_point_indices);
 
     x0 = q - P.transpose()*P*q; //vector x0 contains position of all fixed nodes, zero for everything else
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     //correct M, q and qdot so they are the right size
     q = P*q;
     qdot = P*qdot;
-    M = P*M*P.transpose();
+    /*M = P*M*P.transpose();*/
 
     //run simulation in seperate thread to avoid slowing down the UI
     std::thread simulation_thread(simulate);
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 
     //setup libigl viewer and activate 
     Visualize::setup(q, qdot, true);
-    //Visualize::add_object_to_scene(V,F, Eigen::RowVector3d(244,165,130)/255.);
+    Visualize::add_object_to_scene(V,F, Eigen::RowVector3d(244,165,130)/255.);
     Visualize::viewer().callback_post_draw = &draw;
     
     Visualize::viewer().launch_init(true,false,"Mass-Spring Systems",0,0);
